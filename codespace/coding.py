@@ -15,7 +15,7 @@ service = Service(ChromeDriverManager().install())
 driver = webdriver.Chrome(service=service)
 driver.implicitly_wait(2)
 
-driver.get("https://www.google.com/maps")  # Adjusted URL to match the context of Maps/Routes
+driver.get("https://www.google.com/maps")  # Adjusted URL to match the context of maps/routes
 
 
 def add_destination(address):
@@ -26,7 +26,7 @@ def add_destination(address):
 
 
 def open_routes():
-    xpath = '//button[@data-value="Rotas"]'
+    xpath = '//button[@data-value="Routes"]'
     wait = WebDriverWait(driver, timeout=5)
     routes_button = wait.until(EC.presence_of_element_located((By.XPATH, xpath)))
     routes_button.click()
@@ -34,11 +34,5 @@ def open_routes():
 
 if __name__ == '__main__':
     target_address = 'Rua Afonsina, 175 - Rudge Ramos, São Paulo - SP, 09633-000'
-    
-    # Executing the functions
-    add_destination(target_address)
-    
-    # Optional: If you want to open routes right after adding the destination
-    # open_routes()
 
     time.sleep(600)
