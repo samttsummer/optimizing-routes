@@ -15,7 +15,7 @@ service = Service(ChromeDriverManager().install())
 driver = webdriver.Chrome(service=service)
 driver.implicitly_wait(2)
 
-driver.get("https://www.google.com/maps")  # Adjusted URL to match the context of maps/routes
+driver.get("https://www.google.com/maps")  
 
 
 def add_destination(address):
