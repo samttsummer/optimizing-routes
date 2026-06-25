@@ -1,1 +1,19 @@
+# adicionaDestino e abreRotas
 
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from webdriverManager.chrome import ChromeDriveManager
+
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expectedConditions as EC
+from selenium.webdriver.common.keys import Keys
+
+from time import sleep
+
+adress = 'Av. José Bonifácio, 245 - Farroupilha, Porto Alegre - RS, 90040-130'
+
+service = Service(ChromeDriveManager(), install()
+driver = webdriver.Chrome(service=service)
+
+driver.get("https://www.google.com/apps")
