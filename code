@@ -11,21 +11,31 @@ from selenium.webdriver.common.keys import Keys
 
 from time import sleep
 
-adress = 'Rua Afonsina, 175 - Rudge Ramos, São Paulo - SP, 09633-000'
-
 service = Service(ChromeDriveManager(), install())
 driver = webdriver.Chrome(service=service)
 driver.implicitlyWait(2)
 
 driver.get("https://www.google.com/apps")
 
-barraVazia = driver.findElement(By, ID, 'searchboxinput')
-barraVazia.clear()
-barraVazia.sendKeys(endereco)
-barraVazia.sendKeys(Keys.RETURN)
+def adicionaDestino(endereco):
+  barraVazia = driver.findElement(By, ID, 'searchboxinput')
+  barraVazia.clear()
+  barraVazia.sendKeys(endereco)
+  barraVazia.sendKeys(Keys.RETURN)
 
+def abreRotas():
+  xpath = '//button[@data-value="Rotas"]'
+  wait = WebDriverWait(driver, timeout=5)
+  botaoRotas = wait.until(EC.presenceOfElementLocated((By, XPATH, xpath)))
+  botaoRotas.click()
+
+//button[@aria-label="Fechar rotas"]
 xpath = '//button[@data-value="Rotas"]'
-wait = WebDriverWait(driver, timeout=2)
+wait = WebDriverWait(driver, timeout=5)
 botaoRotas = wait.until(EC.presenceOfElementLocated((By, XPATH, xpath)))
+
+if__name__ == '__main__":
+  adress = 'Rua Afonsina, 175 - Rudge Ramos, São Paulo - SP, 09633-000'
+  adicionaDestino(endereco)
 
 sleep(600)
