@@ -1,4 +1,4 @@
-# addDestination and openRoutes
+# IMPORTS
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -13,15 +13,22 @@ from time import sleep
 import pulp
 import itertools
 
+
+# DRIVER SETUP 
+
 service = Service(ChromeDriverManager().install())
 driver = webdriver.Chrome(service=service)
 driver.implicitly_wait(2)
 driver.get("https://www.google.com/maps")
 
+
+# HELPER FUNCTIONS 
+
 def isOnRoutesTab():
     xpath = '//button[@aria-label="Close directions"]'
     closeRoutesButton = driver.find_elements(By.XPATH, xpath)
     return len(closeRoutesButton) > 0
+
 
 def addDestination(address, boxNumber=1):
     if not isOnRoutesTab():
@@ -29,19 +36,31 @@ def addDestination(address, boxNumber=1):
         emptySearchBar.clear()
         emptySearchBar.send_keys(address)
         emptySearchBar.send_keys(Keys.RETURN)
-else:
-    xpath = '//div[contains(@id, "directions-searchbox")]//input'
-    addressBoxes = driver.find_elements(By.XPATH, xpath)
-    addressBoxes = [box for box in addressBoxes if box.is_displayed()]
-
-    if len(addressBoxes) >= boxNumber:
-        addressBox = addressBoxes[boxNumber - 1]
-        addressBox.send_keys(Keys.CONTROL + 'a')
-        addressBox.send_keys(Keys.DELETE)
-        addressBox.send_keys(address)
-        addressBox.send_keys(Keys.RETURN)
     else:
-        print(f'Could not add the address {len(addressBoxes)} | {boxNumber}')
+        xpath = '//div[contains(@id, "directions-searchbox")]//input'
+        addressBoxes = driver.find_elements(By.XPATH, xpath)
+        addressBoxes = [box for box in addressBoxes if box.is_displayed()]
+
+        if len(addressBoxes) >= boxNumber:
+            addressBox = addressBoxes[boxNumber - 1]
+            addressBox.send_keys(Keys.CONTROL + 'a')
+            addressBox.send_keys(Keys.DELETE)
+            addressBox.send_keys(address)
+            addressBox.send_keys(Keys.RETURN)
+        else:
+            print(f'Could not add the address {len(addressBoxes)} | {boxNumber}')
+
+
+def openDirections():
+    xpath = '//button[@data-value="Directions"]'
+    wait = WebDriverWait(driver, timeout=5)
+    directionsButton = wait.until(EC.presence_of_element_located((By.XPATH, xpath)))
+    directionsButton.click()
+
+    xpath = '//button[@aria-label="Close directions"]'
+    wait = WebDriverWait(driver, timeout=5)
+    wait.until(EC.presence_of_element_located((By.XPATH, xpath)))
+
 
 def addDestinationBox():
     xpath = '//span[text()="Add destination"]'
@@ -51,11 +70,13 @@ def addDestinationBox():
     addDestinationButton = driver.find_element(By.XPATH, xpath)
     addDestinationButton.click()
 
+
 def selectTravelMode(travelMode="Driving"):
     xpath = f'//img[@aria-label="{travelMode}"]'
     wait = WebDriverWait(driver, timeout=3)
     travelModeButton = wait.until(EC.presence_of_element_located((By.XPATH, xpath)))
     travelModeButton.click()
+
 
 def getTotalTravelTime():
     xpath = '//div[@id="section-directions-trip-0"]//div[contains(text(),"min")]'
@@ -63,11 +84,13 @@ def getTotalTravelTime():
     travelTimeElement = wait.until(EC.presence_of_element_located((By.XPATH, xpath)))
     return int(travelTimeElement.text.replace(' min', ''))
 
+
 def getTotalDistance():
     xpath = '//div[@id="section-directions-trip-0"]//div[contains(text(),"km")]'
     wait = WebDriverWait(driver, timeout=3)
     distanceElement = wait.until(EC.presence_of_element_located((By.XPATH, xpath)))
     return float(distanceElement.text.replace(' km', '').replace(',', '.'))
+
 
 # MAIN FUNCTIONS 
 
@@ -89,6 +112,7 @@ def generateDistancePairs(addresses):
                 distancePairs[f'{i}_{j}'] = travelTime
 
     return distancePairs
+
 
 def generateOptimization(addresses, distancePairs):
 
@@ -128,7 +152,7 @@ def generateOptimization(addresses, distancePairs):
                 ]) <= len(subset) - 1
 
     problem.solve(pulp.PULP_CBC_CMD())
-  
+
     solution = []
     startCity = 0
     nextCity = startCity
@@ -144,31 +168,33 @@ def generateOptimization(addresses, distancePairs):
             break
 
     print('Route:')
-    for i in range(len(solution)):
-        print(solution[i][0], ' -> ', solution[i][1])
+    for origin, destination in solution:
+        print(origin, ' -> ', destination)
 
     return solution
-  
+
+
 def showOptimizedRoute(addresses, solution):
     driver.get("https://www.google.com/maps")
 
     addDestination(addresses[0], 1)
     openDirections()
 
-    for i in range(len(solution)):
-        addDestination(addresses[solution[i][0]], i + 1)
+    for i, (origin, destination) in enumerate(solution):
+        addDestination(addresses[origin], i + 1)
         addDestinationBox()
 
     addDestination(addresses[0], len(addresses) + 1)
 
+
 if __name__ == '__main__':
 
     addresses = [
-        "Av. José Bonifácio, 245 - Farroupilha, Porto Alegre - RS, 90040-130",  # Redenção
-        "AVENIDA EDVALDO PEREIRA PAIVA 3001 - Praia de Belas, Porto Alegre - RS, 91110-060",  # Marinha
-        "Av. Guaíba, 544 - Ipanema, Porto Alegre - RS, 91760-740",  # Orla Ipanema
-        "Av. Padre Cacique, 2000 - Praia de Belas, Porto Alegre - RS, 90810-180",  # Iberê
-        "R. Dr. Salvador França, 1427 - Jardim Botânico, Porto Alegre - RS, 90690-000",  # Jardim Botânico
+        "Av. José Bonifácio, 245 - Farroupilha, Porto Alegre - RS, 90040-130",
+        "AVENIDA EDVALDO PEREIRA PAIVA 3001 - Praia de Belas, Porto Alegre - RS, 91110-060",
+        "Av. Guaíba, 544 - Ipanema, Porto Alegre - RS, 91760-740",
+        "Av. Padre Cacique, 2000 - Praia de Belas, Porto Alegre - RS, 90810-180",
+        "R. Dr. Salvador França, 1427 - Jardim Botânico, Porto Alegre - RS, 90690-000",
     ]
 
     distancePairs = generateDistancePairs(addresses)
